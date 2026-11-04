@@ -93,3 +93,16 @@ CREATE OR REPLACE TRIGGER trg_validar_tarefa
 BEFORE INSERT ON tarefas
 FOR EACH ROW
 EXECUTE FUNCTION fn_trg_validar_tarefa();
+
+create view vw_cronograma_prazos as
+select
+    t.nome_tarefa,
+    t.status AS status_tarefa,
+	t.prazo_entrega,
+    (t.prazo_entrega - CURRENT_DATE) AS dias_restantes,
+    u.nome AS nome_responsavel
+FROM tarefas t
+JOIN usuarios u ON t.usuario_id = u.id
+ORDER BY t.prazo_entrega ASC;
+
+-- FIZ SÓ OS QUE DAVA PARA FAZER ATÉ ONDE APRENDEMOS
