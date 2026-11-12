@@ -1,4 +1,4 @@
--- Tabela de Usuários (Colaboradores)
+
 CREATE TABLE usuarios (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
@@ -7,7 +7,7 @@ CREATE TABLE usuarios (
     status_colab VARCHAR(30) DEFAULT 'Inativo' CHECK (status_colab IN ('Inativo', 'Ativo'))
 );
 
--- Tabela de Tarefas
+
 CREATE TABLE tarefas (
     id SERIAL PRIMARY KEY,
     usuario_id INT REFERENCES usuarios(id),
@@ -17,9 +17,9 @@ CREATE TABLE tarefas (
     status VARCHAR(100) DEFAULT 'Agendada' CHECK (status IN ('Agendada', 'Em curso', 'Finalizada'))
 );
 
--- Tabela de Histórico (Auditoria)
-CREATE TABLE historico_tarefas (
-    id SERIAL PRIMARY KEY,
+
+create table historico_tarefas (
+    id serial primary key,
     tarefa_id INT REFERENCES tarefas(id),
     acao VARCHAR(100) NOT NULL,
     descricao VARCHAR(100),
