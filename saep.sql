@@ -1,108 +1,138 @@
-
-CREATE TABLE usuarios (
-    id SERIAL PRIMARY KEY,
-    nome VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    senha VARCHAR(100) NOT NULL,
-    status_colab VARCHAR(30) DEFAULT 'Inativo' CHECK (status_colab IN ('Inativo', 'Ativo'))
+create table usuarios (
+    id serial primary key,
+    nome varchar(100) not null,
+    email varchar(100) not null unique,
+    senha varchar(100) not null,
+    status_colab varchar(30) default 'inativo' check (status_colab in ('inativo', 'ativo'))
 );
 
-
-CREATE TABLE tarefas (
-    id SERIAL PRIMARY KEY,
-    usuario_id INT REFERENCES usuarios(id),
-    nome_tarefa VARCHAR(100) NOT NULL,
-    prazo_entrega TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    categoria VARCHAR(100) NOT NULL,
-    status VARCHAR(100) DEFAULT 'Agendada' CHECK (status IN ('Agendada', 'Em curso', 'Finalizada'))
+create table tarefas (
+    id serial primary key,
+    usuario_id int references usuarios(id),
+    nome_tarefa varchar(100) not null,
+    prazo_entrega timestamp default current_timestamp,
+    categoria varchar(100) not null,
+    status varchar(100) default 'agendada' check (status in ('agendada', 'em curso', 'finalizada'))
 );
-
 
 create table historico_tarefas (
     id serial primary key,
-    tarefa_id INT REFERENCES tarefas(id),
-    acao VARCHAR(100) NOT NULL,
-    descricao VARCHAR(100),
-    data_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    tarefa_id int references tarefas(id),
+    acao varchar(100) not null,
+    descricao varchar(100),
+    data_registro timestamp default current_timestamp
 );
 
 INSERT INTO usuarios (nome, email, senha, status_colab) VALUES
-('Ana Silva', 'ana.silva@consultoria.com', 'Senha123!', 'Ativo'),
-('Carlos Oliveira', 'carlos.oliveira@consultoria.com', 'Senha456!', 'Ativo'),
-('Mariana Santos', 'mariana.santos@consultoria.com', 'Senha789!', 'Inativo');
+('Ana Silva', 'ana.silva@consultoria.com', 'Senha123!', 'ativo'),
+('Carlos Oliveira', 'carlos.oliveira@consultoria.com', 'Senha456!', 'ativo'),
+('Mariana Santos', 'mariana.santos@consultoria.com', 'Senha789!', 'inativo');
 
--- Inserção de Tarefas
+
 INSERT INTO tarefas (usuario_id, nome_tarefa, prazo_entrega, categoria, status) VALUES
-(1, 'Mapeamento de Processos RH', '2026-11-15 18:00:00', 'Consultoria Estratégica', 'Em curso'),
-(2, 'Auditoria de Segurança da Informação', '2026-11-05 17:00:00', 'Auditoria de Processos', 'Agendada'),
-(1, 'Migração do Banco de Dados PostgreSQL', '2026-11-01 12:00:00', 'Implementação de Sistemas', 'Agendada');
+(1, 'Mapeamento de Processos RH', '2026-11-15 18:00:00', 'Consultoria Estratégica', 'em curso'),
+(2, 'Auditoria de Segurança da Informação', '2026-11-05 17:00:00', 'Auditoria de Processos', 'agendada'),
+(3, 'Migração do Banco de Dados PostgreSQL', '2026-11-01 12:00:00', 'Implementação de Sistemas', 'agendada');
 
--- Inserção de Histórico
+
 INSERT INTO historico_tarefas (tarefa_id, acao, descricao, data_registro) VALUES
 (1, 'Criação de Tarefa', 'Tarefa criada e atribuída à colaboradora Ana Silva', '2026-10-20 09:00:00'),
-(1, 'Alteração de Status', 'Status alterado de Agendada para Em curso', '2026-10-22 14:30:00'),
-(2, 'Criação de Tarefa', 'Tarefa criada e atribuída ao colaborador Carlos Oliveira', '2026-10-25 10:15:00');
+(2, 'Alteração de Status', 'Status alterado de Agendada para Em curso', '2026-10-22 14:30:00'),
+(3, 'Criação de Tarefa', 'Tarefa criada e atribuída ao colaborador Carlos Oliveira', '2026-10-25 10:15:00');
 
-CREATE OR REPLACE VIEW vw_painel_principal AS
-SELECT 
-    u.nome AS nome_colaborador,
-    t.nome_tarefa AS titulo_tarefa,
+
+create or replace view vw_painel_principal as
+select 
+    u.nome as nome_colaborador,
+    t.nome_tarefa as titulo_tarefa,
     t.categoria,
     t.prazo_entrega,
-    t.status AS status_atividade
-FROM tarefas t
-JOIN usuarios u ON t.usuario_id = u.id;
+    t.status as status_atividade
+from
+	tarefas t
+join
+	usuarios u on t.usuario_id = u.id;
 
-CREATE OR REPLACE FUNCTION fn_trg_validar_tarefa()
-RETURNS TRIGGER AS $$
-DECLARE
-    v_status_colab VARCHAR;
-    v_nome_colab VARCHAR;
-BEGIN
-    -- 1. Garante que a data de entrega tenha um valor padrão
-    NEW.prazo_entrega := COALESCE(NEW.prazo_entrega, CURRENT_TIMESTAMP);
+create or replace function fn_trg_validar_tarefa()
+returns trigger as 
+$$
+declare
+    v_status_colab varchar;
+    v_nome_colab varchar;
+begin
+    new.prazo_entrega := coalesce(new.prazo_entrega, current_timestamp);
 
-    -- 2. Busca o status e nome do colaborador
-    SELECT status_colab, nome 
-    INTO v_status_colab, v_nome_colab
-    FROM usuarios
-    WHERE id = NEW.usuario_id;
+select
+	status_colab,
+	nome 
+into
+	v_status_colab,
+	v_nome_colab
+from
+	usuarios
+where
+	id = new.usuario_id;
 
-    -- 3. Validações
-    IF v_status_colab IS NULL THEN
-        RAISE EXCEPTION 'Erro: Colaborador com ID % não encontrado.', NEW.usuario_id;
-    ELSIF v_status_colab <> 'Ativo' THEN
-        RAISE EXCEPTION 'Erro: Não é possível atribuir tarefas a colaboradores inativos (Colaborador: %).', v_nome_colab;
-    END IF;
+    if v_status_colab is null then
+        raise exception 'erro: colaborador com id % não encontrado.', new.usuario_id;
+    elsif v_status_colab <> 'ativo' then
+        raise exception 'erro: não é possível atribuir tarefas a colaboradores inativos (colaborador: %).', v_nome_colab;
+    end if;
 
-    -- 4. Registro no Histórico de Tarefas
-    INSERT INTO historico_tarefas (tarefa_id, acao, descricao, data_registro)
-    VALUES (
-        NEW.id,
-        'Criação de Tarefa',
-        FORMAT('Tarefa "%s" atribuída ao colaborador %s', NEW.nome_tarefa, v_nome_colab),
-        CURRENT_TIMESTAMP
+    insert into historico_tarefas (tarefa_id, acao, descricao, data_registro)
+    values (
+        new.id,
+        'criação de tarefa',
+        format('tarefa "%s" atribuída ao colaborador %s', new.nome_tarefa, v_nome_colab),
+        current_timestamp
     );
 
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+    return new;
+end;
+$$ language plpgsql;
 
--- Associação do Gatilho à Tabela tarefas
-CREATE OR REPLACE TRIGGER trg_validar_tarefa
-BEFORE INSERT ON tarefas
-FOR EACH ROW
-EXECUTE FUNCTION fn_trg_validar_tarefa();
+create or replace trigger trg_validar_tarefa
+before insert on tarefas
+for each row
+execute function fn_trg_validar_tarefa();
 
 create view vw_cronograma_prazos as
 select
     t.nome_tarefa,
-    t.status AS status_tarefa,
-	t.prazo_entrega,
-    (t.prazo_entrega - CURRENT_DATE) AS dias_restantes,
-    u.nome AS nome_responsavel
-FROM tarefas t
-JOIN usuarios u ON t.usuario_id = u.id
-ORDER BY t.prazo_entrega ASC;
+    t.status as status_tarefa,
+    t.prazo_entrega,
+    (t.prazo_entrega - current_date) as dias_restantes,
+    u.nome as nome_responsavel
+from
+	tarefas t
+join
+	usuarios u on t.usuario_id = u.id
+order by 
+	t.prazo_entrega asc;
 
--- FIZ SÓ OS QUE DAVA PARA FAZER ATÉ ONDE APRENDEMOS
+-- ESSA EU FIZ NA AULA DO DIA 12/11
+
+create or replace function fn_buscar_colaboradores(termo_pesq varchar)
+returns table(
+	id int,
+	nome varchar,
+	email varchar,
+	status_colab varchar
+)
+as
+$$
+begin
+	return query
+	select
+	u.id,
+	u.nome,
+	u.email,
+	u.status_colab
+from
+	usuarios u
+where
+	u.nome ilike '%' || termo_pesq || '%'
+	or
+	u.email ilike '%' || termo_pesq || '%';
+end;
+$$ language plpgsql;
