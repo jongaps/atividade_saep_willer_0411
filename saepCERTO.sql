@@ -23,20 +23,22 @@ create table historico_tarefas (
     data_registro timestamp default current_timestamp
 );
 
-insert into usuarios (nome, email, senha, status_colab) values
-('ana silva', 'ana.silva@consultoria.com', 'senha123!', 'ativo'),
-('carlos oliveira', 'carlos.oliveira@consultoria.com', 'senha456!', 'ativo'),
-('mariana santos', 'mariana.santos@consultoria.com', 'senha789!', 'inativo');
+INSERT INTO usuarios (nome, email, senha, status_colab) VALUES
+('Ana Silva', 'ana.silva@consultoria.com', 'Senha123!', 'Ativo'),
+('Carlos Oliveira', 'carlos.oliveira@consultoria.com', 'Senha456!', 'Ativo'),
+('Mariana Santos', 'mariana.santos@consultoria.com', 'Senha789!', 'Inativo');
 
-insert into tarefas (usuario_id, nome_tarefa, prazo_entrega, categoria, status) values
-(1, 'mapeamento de processos rh', '2026-11-15 18:00:00', 'consultoria estratégica', 'em curso'),
-(2, 'auditoria de segurança da informação', '2026-11-05 17:00:00', 'auditoria de processos', 'agendada'),
-(1, 'migração do banco de dados postgresql', '2026-11-01 12:00:00', 'implementação de sistemas', 'agendada');
 
-insert into historico_tarefas (tarefa_id, acao, descricao, data_registro) values
-(1, 'criação de tarefa', 'tarefa criada e atribuída à colaboradora ana silva', '2026-10-20 09:00:00'),
-(1, 'alteração de status', 'status alterado de agendada para em curso', '2026-10-22 14:30:00'),
-(2, 'criação de tarefa', 'tarefa criada e atribuída ao colaborador carlos oliveira', '2026-10-25 10:15:00');
+INSERT INTO tarefas (usuario_id, nome_tarefa, prazo_entrega, categoria, status) VALUES
+(1, 'Mapeamento de Processos RH', '2026-11-15 18:00:00', 'Consultoria Estratégica', 'Em curso'),
+(2, 'Auditoria de Segurança da Informação', '2026-11-05 17:00:00', 'Auditoria de Processos', 'Agendada'),
+(1, 'Migração do Banco de Dados PostgreSQL', '2026-11-01 12:00:00', 'Implementação de Sistemas', 'Agendada');
+
+
+INSERT INTO historico_tarefas (tarefa_id, acao, descricao, data_registro) VALUES
+(1, 'Criação de Tarefa', 'Tarefa criada e atribuída à colaboradora Ana Silva', '2026-10-20 09:00:00'),
+(1, 'Alteração de Status', 'Status alterado de Agendada para Em curso', '2026-10-22 14:30:00'),
+(2, 'Criação de Tarefa', 'Tarefa criada e atribuída ao colaborador Carlos Oliveira', '2026-10-25 10:15:00');
 
 create or replace view vw_painel_principal as
 select 
